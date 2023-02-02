@@ -23,7 +23,8 @@ func main() {
 	d.AddTitle("test", 3).
 		AddBlankLines(2).
 		AddTitle("t*es#t2", 1).
-		AddCodeBlock("var text = \"123\"", "go")
+		AddCodeBlock("var text = \"123\"", "go").
+		AddLink("this is a link", "https://www.google.com")
 
 	err := d.Export(exportPath)
 	if err != nil {
