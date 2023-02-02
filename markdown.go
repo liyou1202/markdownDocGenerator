@@ -22,7 +22,8 @@ func main() {
 	d := NewDoc()
 	d.AddTitle("test", 3).
 		AddBlankLines(2).
-		AddTitle("t*es#t2", 1)
+		AddTitle("t*es#t2", 1).
+		AddCodeBlock("var text = \"123\"", "go")
 
 	err := d.Export(exportPath)
 	if err != nil {
@@ -61,6 +62,22 @@ func (doc *markdownDoc) AddBlankLines(lv int) *markdownDoc {
 			doc.writeLine("")
 		}
 	}
+
+	return doc
+}
+
+func (doc *markdownDoc) AddCodeBlock(code, language string) *markdownDoc {
+	code = replaceEscapeCharacter(code)
+	mdSyntax := fmt.Sprintf("``` %s\n%s\n```\n", language, code)
+	doc.writeLine(mdSyntax)
+
+	return doc
+}
+
+func (doc *markdownDoc) AddLink(text, path string) *markdownDoc {
+	text = replaceEscapeCharacter(text)
+	mdSyntax := fmt.Sprintf("[%s](%s)", text, path)
+	doc.writeLine(mdSyntax)
 
 	return doc
 }
