@@ -24,8 +24,25 @@ func main() {
 		AddBlankLines(2).
 		AddTitle("t*es#t2", 1).
 		AddCodeBlock("var text = \"123\"", "go").
+		AddInterval().
 		AddLink("this is a link", "https://www.google.com")
 
+	escapeCharacters := []string{
+		"\\", "`", "*",
+		"_", "{", "}",
+		"[", "]", "(",
+		")", "#", "+",
+		"-", ".", "!",
+	}
+	var s string
+	for _, v := range escapeCharacters {
+		s += v
+	}
+	d.AddTitle("## this is section 2", 3).
+		AddCodeBlock(s, "go").
+		AddTitle(s, 3).
+		AddLink("### abc.com = 5 * 10 test", "https://google.com").
+		AddImage("place", "https://www.google.com/favicon.ico", "12345")
 	err := d.Export(exportPath)
 	if err != nil {
 		log.Fatal(err)
@@ -51,8 +68,19 @@ func (doc *markdownDoc) AddTitle(t string, lv int) *markdownDoc {
 		fmt.Sprintf("failed to add Title %s in level: %d", t, lv)
 		return doc
 	}
-	t = replaceEscapeCharacter(t)
 	mdSyntax := strings.Repeat("#", lv) + " " + t
+	doc.writeLine(mdSyntax)
+	return doc
+}
+
+func (doc *markdownDoc) AddInterval() *markdownDoc {
+	mdSyntax := strings.Repeat("-", 3) + " "
+	doc.writeLine(mdSyntax)
+	return doc
+}
+
+func (doc *markdownDoc) AddImage(placeholder, path, title string) *markdownDoc {
+	mdSyntax := fmt.Sprintf("![%s](%s) %s", placeholder, path, title)
 	doc.writeLine(mdSyntax)
 	return doc
 }
@@ -68,7 +96,6 @@ func (doc *markdownDoc) AddBlankLines(lv int) *markdownDoc {
 }
 
 func (doc *markdownDoc) AddCodeBlock(code, language string) *markdownDoc {
-	code = replaceEscapeCharacter(code)
 	mdSyntax := fmt.Sprintf("``` %s\n%s\n```\n", language, code)
 	doc.writeLine(mdSyntax)
 
@@ -76,8 +103,7 @@ func (doc *markdownDoc) AddCodeBlock(code, language string) *markdownDoc {
 }
 
 func (doc *markdownDoc) AddLink(text, path string) *markdownDoc {
-	text = replaceEscapeCharacter(text)
-	mdSyntax := fmt.Sprintf("[%s](%s)", text, path)
+	mdSyntax := fmt.Sprintf("![%s](%s)", text, path)
 	doc.writeLine(mdSyntax)
 
 	return doc
@@ -85,18 +111,4 @@ func (doc *markdownDoc) AddLink(text, path string) *markdownDoc {
 
 func (doc *markdownDoc) Export(filename string) error {
 	return ioutil.WriteFile(filename, []byte(doc.content.String()), os.ModePerm)
-}
-
-func replaceEscapeCharacter(content string) string {
-	escapeCharacters := []string{
-		"\\", "`", "*",
-		"_", "{", "}",
-		"[", "]", "(",
-		")", "#", "+",
-		"-", ".", "!",
-	}
-	for _, c := range escapeCharacters {
-		content = strings.Replace(content, c, "\\"+c, -1)
-	}
-	return content
 }
